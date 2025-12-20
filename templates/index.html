@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Roadmap Dashboard</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Frappe Gantt -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/frappe-gantt/dist/frappe-gantt.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/frappe-gantt/dist/frappe-gantt.min.js"></script>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <h1>Roadmap Dashboard</h1>
+        <div class="header-actions">
+            <select id="yearFilter" class="year-filter">
+                <option value="2026">2026</option>
+            </select>
+            <button id="addGoalBtn" class="btn btn-primary">+ 목표 추가</button>
+            <button id="addMemberBtn" class="btn btn-secondary">+ 인력 추가</button>
+            <button id="exportPdfBtn" class="btn btn-outline">PDF 내보내기</button>
+            <button id="resetDataBtn" class="btn btn-danger" style="margin-left: 1rem;">전체 데이터 삭제</button>
+        </div>
+    </header>
+
+    <!-- Tab Navigation -->
+    <nav class="tab-nav">
+        <button class="tab-btn active" data-tab="dashboard">대시보드</button>
+        <button class="tab-btn" data-tab="members">인력 관리</button>
+        <button class="tab-btn" data-tab="brainstorming">브레인스토밍</button>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Dashboard Section -->
+        <div class="tab-content active" id="dashboard">
+            <!-- Summary Cards -->
+            <section class="summary-cards">
+                <div class="card summary-card">
+                    <div class="card-icon">🎯</div>
+                    <div class="card-content">
+                        <span class="card-value" id="totalGoals">0</span>
+                        <span class="card-label">전체 목표</span>
+                    </div>
+                </div>
+                <div class="card summary-card">
+                    <div class="card-icon">📍</div>
+                    <div class="card-content">
+                        <span class="card-value" id="totalMilestones">0</span>
+                        <span class="card-label">마일스톤</span>
+                    </div>
+                </div>
+                <div class="card summary-card">
+                    <div class="card-icon">✅</div>
+                    <div class="card-content">
+                        <span class="card-value" id="totalTasks">0</span>
+                        <span class="card-label">태스크</span>
+                    </div>
+                </div>
+                <div class="card summary-card">
+                    <div class="card-icon">📊</div>
+                    <div class="card-content">
+                        <span class="card-value" id="overallProgress">0%</span>
+                        <span class="card-label">전체 진척률</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Charts Section -->
+            <section class="charts-section charts-two-cols">
+                <div class="card chart-card">
+                    <h3>유형별 진척률</h3>
+                    <canvas id="typeChart"></canvas>
+                </div>
+                <div class="card chart-card">
+                    <h3>제품별 진척률</h3>
+                    <canvas id="productChart"></canvas>
+                </div>
+            </section>
+
+            <!-- Gantt Chart Section -->
+            <section class="gantt-section">
+                <div class="card">
+                    <div class="gantt-header">
+                        <h3>로드맵 타임라인</h3>
+                        <div class="gantt-view-modes">
+                            <button class="btn btn-sm" data-mode="Day">일</button>
+                            <button class="btn btn-sm active" data-mode="Week">주</button>
+                            <button class="btn btn-sm" data-mode="Month">월</button>
+                            <button class="btn btn-sm" data-mode="Quarter">분기</button>
+                        </div>
+                    </div>
+                    <div id="gantt"></div>
+                </div>
+            </section>
+
+            <!-- Goals Tree Section -->
+            <section class="goals-section">
+                <div class="card">
+                    <h3>목표 목록</h3>
+                    <div class="goals-filter">
+                        <select id="typeFilter">
+                            <option value="">전체 유형</option>
+                            <option value="issue">문제점 개선</option>
+                            <option value="feature">신규 기능</option>
+                            <option value="feedback">사용자 피드백</option>
+                        </select>
+                        <select id="teamFilter">
+                            <option value="">전체 팀</option>
+                        </select>
+                    </div>
+                    <div id="goalsTree" class="goals-tree"></div>
+                </div>
+            </section>
+        </div>
+
+        <!-- Members Section -->
+        <div class="tab-content" id="members">
+            <section class="members-section">
+                <!-- Summary Cards -->
+                <div class="members-overview">
+                    <div class="card members-stats-card">
+                        <h3>인력 현황</h3>
+                        <div class="members-summary">
+                            <div class="member-stat">
+                                <span class="stat-value" id="existingCount">0</span>
+                                <span class="stat-label">기존 인력</span>
+                            </div>
+                            <div class="member-stat">
+                                <span class="stat-value" id="newCount">0</span>
+                                <span class="stat-label">신규 인력</span>
+                            </div>
+                            <div class="member-stat total">
+                                <span class="stat-value" id="totalMembers">0</span>
+                                <span class="stat-label">전체</span>
+                            </div>
+                        </div>
+                        <div id="roleDistribution" class="role-distribution"></div>
+                    </div>
+                    <div class="card product-assignment-card">
+                        <h3>제품별 인원 배치</h3>
+                        <div id="productAssignments" class="product-assignments"></div>
+                    </div>
+                </div>
+
+                <!-- Member List -->
+                <div class="card">
+                    <div class="members-header">
+                        <h3>인력 목록</h3>
+                        <button id="addMemberBtn2" class="btn btn-primary">+ 인력 추가</button>
+                    </div>
+                    <div class="members-filter">
+                        <select id="memberTypeFilter">
+                            <option value="">전체 유형</option>
+                            <option value="existing">기존 인력</option>
+                            <option value="new">신규 인력</option>
+                        </select>
+                        <select id="memberRoleFilter">
+                            <option value="">전체 역할</option>
+                            <option value="PM">PM</option>
+                            <option value="Developer">Developer</option>
+                            <option value="Designer">Designer</option>
+                            <option value="QA">QA</option>
+                        </select>
+                    </div>
+                    <div id="membersList" class="members-list"></div>
+                </div>
+            </section>
+        </div>
+
+        <!-- Brainstorming Section -->
+        <div class="tab-content" id="brainstorming">
+            <section class="brainstorming-section">
+                <div class="card">
+                    <div class="brainstorming-header">
+                        <h3>아이디어 목록</h3>
+                        <button id="addIdeaBtn" class="btn btn-primary">+ 아이디어 추가</button>
+                    </div>
+                    <div class="ideas-summary">
+                        <div class="idea-stat">
+                            <span class="stat-value" id="openIdeasCount">0</span>
+                            <span class="stat-label">검토 중</span>
+                        </div>
+                        <div class="idea-stat">
+                            <span class="stat-value" id="approvedIdeasCount">0</span>
+                            <span class="stat-label">승인됨</span>
+                        </div>
+                        <div class="idea-stat">
+                            <span class="stat-value" id="convertedIdeasCount">0</span>
+                            <span class="stat-label">목표 전환</span>
+                        </div>
+                        <div class="idea-stat">
+                            <span class="stat-value" id="totalIdeasCount">0</span>
+                            <span class="stat-label">전체</span>
+                        </div>
+                    </div>
+                    <div class="ideas-filter">
+                        <select id="ideaStatusFilter">
+                            <option value="">전체 상태</option>
+                            <option value="open">검토 중</option>
+                            <option value="approved">승인됨</option>
+                            <option value="rejected">거절됨</option>
+                            <option value="converted">목표 전환</option>
+                        </select>
+                        <select id="ideaTypeFilter">
+                            <option value="">전체 유형</option>
+                            <option value="issue">문제점 개선</option>
+                            <option value="feature">신규 기능</option>
+                            <option value="feedback">사용자 피드백</option>
+                        </select>
+                        <select id="ideaPriorityFilter">
+                            <option value="">전체 우선순위</option>
+                            <option value="1">높음</option>
+                            <option value="2">중간</option>
+                            <option value="3">낮음</option>
+                        </select>
+                    </div>
+                    <div id="ideasList" class="ideas-list"></div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- Edit Panel (Slide from right) -->
+    <aside class="edit-panel" id="editPanel">
+        <div class="edit-panel-header">
+            <h2 id="editPanelTitle">편집</h2>
+            <button class="btn-close" id="closeEditPanel">&times;</button>
+        </div>
+        <div class="edit-panel-content" id="editPanelContent">
+            <!-- Dynamic form content -->
+        </div>
+    </aside>
+
+    <!-- Overlay -->
+    <div class="overlay" id="overlay"></div>
+
+    <!-- Scripts -->
+    <script src="/static/js/api.js"></script>
+    <script src="/static/js/editor.js"></script>
+    <script src="/static/js/dashboard.js"></script>
+    <script src="/static/js/gantt.js"></script>
+    <script src="/static/js/app.js"></script>
+</body>
+</html>
