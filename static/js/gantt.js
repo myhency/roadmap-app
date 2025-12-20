@@ -1,7 +1,9 @@
 // Gantt Chart Management
 const GanttChart = {
     chart: null,
-    viewMode: 'Week',
+    viewMode: 'Month',
+    currentTasks: [],
+    currentYear: null,
 
     init() {
         // Setup view mode buttons
@@ -10,72 +12,119 @@ const GanttChart = {
                 document.querySelectorAll('.gantt-view-modes button').forEach(b => b.classList.remove('active'));
                 e.target.classList.add('active');
                 this.viewMode = e.target.dataset.mode;
-                if (this.chart) {
-                    this.chart.change_view_mode(this.viewMode);
+                // Re-render chart with new view mode (change_view_mode has bugs)
+                if (this.currentTasks.length > 0) {
+                    this.renderChart(this.currentTasks);
                 }
             });
         });
     },
 
-    async update(year) {
-        const data = await API.getGanttData({ year });
-
-        // Filter out items without dates and prepare for Frappe Gantt
-        const tasks = data
-            .filter(item => item.start && item.end)
-            .map(item => ({
-                id: item.id,
-                name: item.name,
-                start: item.start,
-                end: item.end,
-                progress: item.progress,
-                dependencies: item.dependencies || '',
-                custom_class: this.getCustomClass(item)
-            }));
-
+    renderChart(tasks) {
         const container = document.getElementById('gantt');
-
-        if (tasks.length === 0) {
-            container.innerHTML = `
-                <div class="empty-state">
-                    <div class="empty-state-icon">📅</div>
-                    <p>표시할 일정이 없습니다.</p>
-                    <p>목표에 시작일과 종료일을 설정해주세요.</p>
-                </div>
-            `;
-            this.chart = null;
-            return;
-        }
-
         container.innerHTML = '<svg id="gantt-svg"></svg>';
 
+        // Adjust column width based on view mode
+        const columnWidths = {
+            'Week': 140,
+            'Month': 120
+        };
+
+        this.chart = new Gantt('#gantt-svg', tasks, {
+            view_mode: this.viewMode,
+            date_format: 'YYYY-MM-DD',
+            language: 'ko',
+            column_width: columnWidths[this.viewMode] || 120,
+            custom_popup_html: (task) => {
+                return `
+                    <div class="details-container">
+                        <h5>${task.name}</h5>
+                        <p>진척률: ${task.progress}%</p>
+                        <p>${task.start} ~ ${task.end}</p>
+                    </div>
+                `;
+            },
+            on_click: (task) => {
+                this.handleTaskClick(task);
+            },
+            on_progress_change: (task, progress) => {
+                this.handleProgressChange(task, progress);
+            }
+        });
+
+        // Scroll to show the first task bar
+        setTimeout(() => {
+            const container = document.querySelector('.gantt-container');
+            const firstBar = document.querySelector('.gantt .bar-wrapper');
+            if (container && firstBar) {
+                const barRect = firstBar.getBoundingClientRect();
+                const containerRect = container.getBoundingClientRect();
+                // Scroll so the first bar is near the left side with some padding
+                const scrollPos = container.scrollLeft + (barRect.left - containerRect.left) - 100;
+                container.scrollLeft = Math.max(0, scrollPos);
+            }
+        }, 200);
+    },
+
+    async update(year) {
+        const container = document.getElementById('gantt');
+        this.currentYear = year;
+
+        // Define date range: from start of selected year to end of next year
+        const rangeStart = `${year}-01-01`;
+        const rangeEnd = `${year + 1}-12-31`;
+
         try {
-            this.chart = new Gantt('#gantt-svg', tasks, {
-                view_mode: this.viewMode,
-                date_format: 'YYYY-MM-DD',
-                language: 'ko',
-                custom_popup_html: (task) => {
-                    return `
-                        <div class="details-container">
-                            <h5>${task.name}</h5>
-                            <p>진척률: ${task.progress}%</p>
-                            <p>${task.start} ~ ${task.end}</p>
-                        </div>
-                    `;
-                },
-                on_click: (task) => {
-                    this.handleTaskClick(task);
-                },
-                on_progress_change: (task, progress) => {
-                    this.handleProgressChange(task, progress);
-                }
-            });
+            const data = await API.getGanttData({ year });
+
+            // Filter out items without dates and clamp to year range
+            let tasks = data
+                .filter(item => item.start && item.end)
+                .filter(item => {
+                    // Only include tasks that overlap with our range
+                    return item.end >= rangeStart && item.start <= rangeEnd;
+                })
+                .map(item => {
+                    // Clamp dates to the range
+                    let start = item.start;
+                    let end = item.end;
+
+                    if (start < rangeStart) start = rangeStart;
+                    if (end > rangeEnd) end = rangeEnd;
+
+                    return {
+                        id: item.id,
+                        name: item.name,
+                        start: start,
+                        end: end,
+                        progress: item.progress,
+                        dependencies: item.dependencies || '',
+                        custom_class: this.getCustomClass(item)
+                    };
+                });
+
+            if (tasks.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">📅</div>
+                        <p>표시할 일정이 없습니다.</p>
+                        <p>목표에 시작일과 종료일을 설정해주세요.</p>
+                    </div>
+                `;
+                this.chart = null;
+                this.currentTasks = [];
+                return;
+            }
+
+            this.currentTasks = tasks;
+            this.renderChart(tasks);
         } catch (error) {
             console.error('Gantt chart error:', error);
             container.innerHTML = `
                 <div class="empty-state">
                     <div class="empty-state-icon">⚠️</div>
                     <p>간트 차트를 표시할 수 없습니다.</p>
+                    <p style="font-size: 0.75rem; color: #999;">${error.message}</p>
                 </div>
             `;
         }

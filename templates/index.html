@@ -8,8 +8,8 @@
     <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <!-- Frappe Gantt -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/frappe-gantt/dist/frappe-gantt.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/frappe-gantt/dist/frappe-gantt.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/frappe-gantt/dist/frappe-gantt.css">
+    <script src="https://cdn.jsdelivr.net/npm/frappe-gantt/dist/frappe-gantt.umd.js"></script>
 </head>
 <body>
     <!-- Header -->
@@ -29,6 +29,7 @@
     <!-- Tab Navigation -->
     <nav class="tab-nav">
         <button class="tab-btn active" data-tab="dashboard">대시보드</button>
+        <button class="tab-btn" data-tab="goal-manager">목표 관리</button>
         <button class="tab-btn" data-tab="members">인력 관리</button>
         <button class="tab-btn" data-tab="brainstorming">브레인스토밍</button>
     </nav>
@@ -87,10 +88,8 @@
                     <div class="gantt-header">
                         <h3>로드맵 타임라인</h3>
                         <div class="gantt-view-modes">
-                            <button class="btn btn-sm" data-mode="Day">일</button>
-                            <button class="btn btn-sm active" data-mode="Week">주</button>
-                            <button class="btn btn-sm" data-mode="Month">월</button>
-                            <button class="btn btn-sm" data-mode="Quarter">분기</button>
+                            <button class="btn btn-sm" data-mode="Week">주</button>
+                            <button class="btn btn-sm active" data-mode="Month">월</button>
                         </div>
                     </div>
                     <div id="gantt"></div>
@@ -113,6 +112,53 @@
                         </select>
                     </div>
                     <div id="goalsTree" class="goals-tree"></div>
+                </div>
+            </section>
+        </div>
+
+        <!-- Goal Manager Section -->
+        <div class="tab-content" id="goal-manager">
+            <section class="goal-manager-section">
+                <div class="kanban-header">
+                    <h3>목표 일정 관리</h3>
+                    <p class="kanban-help">목표 카드를 드래그하여 원하는 분기로 이동하세요</p>
+                </div>
+                <div class="kanban-board" id="kanbanBoard">
+                    <div class="kanban-column" data-quarter="backlog">
+                        <div class="kanban-column-header">
+                            <span class="column-title">백로그</span>
+                            <span class="column-count">0</span>
+                        </div>
+                        <div class="kanban-column-body" data-quarter="backlog"></div>
+                    </div>
+                    <div class="kanban-column" data-quarter="Q1">
+                        <div class="kanban-column-header">
+                            <span class="column-title">Q1 (1-3월)</span>
+                            <span class="column-count">0</span>
+                        </div>
+                        <div class="kanban-column-body" data-quarter="Q1"></div>
+                    </div>
+                    <div class="kanban-column" data-quarter="Q2">
+                        <div class="kanban-column-header">
+                            <span class="column-title">Q2 (4-6월)</span>
+                            <span class="column-count">0</span>
+                        </div>
+                        <div class="kanban-column-body" data-quarter="Q2"></div>
+                    </div>
+                    <div class="kanban-column" data-quarter="Q3">
+                        <div class="kanban-column-header">
+                            <span class="column-title">Q3 (7-9월)</span>
+                            <span class="column-count">0</span>
+                        </div>
+                        <div class="kanban-column-body" data-quarter="Q3"></div>
+                    </div>
+                    <div class="kanban-column" data-quarter="Q4">
+                        <div class="kanban-column-header">
+                            <span class="column-title">Q4 (10-12월)</span>
+                            <span class="column-count">0</span>
+                        </div>
+                        <div class="kanban-column-body" data-quarter="Q4"></div>
+                    </div>
                 </div>
             </section>
         </div>
@@ -243,6 +289,7 @@
     <script src="/static/js/editor.js"></script>
     <script src="/static/js/dashboard.js"></script>
     <script src="/static/js/gantt.js"></script>
+    <script src="/static/js/goal-manager.js"></script>
     <script src="/static/js/app.js"></script>
 </body>
 </html>

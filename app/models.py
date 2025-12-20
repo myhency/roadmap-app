@@ -32,6 +32,7 @@ class Goal(Base):
     quarter = Column(String(10))  # Q1, Q2, Q3, Q4, or NULL
     team = Column(String(100))
     product = Column(String(100))
+    tags = Column(String(500))  # Comma-separated tags
     progress = Column(Integer, default=0)  # 0-100
     start_date = Column(Date)
     end_date = Column(Date)

@@ -27,11 +27,13 @@ const Editor = {
         this.title.textContent = title;
         this.panel.classList.add('open');
         this.overlay.classList.add('visible');
+        document.body.classList.add('panel-open');
     },
 
     close() {
         this.panel.classList.remove('open');
         this.overlay.classList.remove('visible');
+        document.body.classList.remove('panel-open');
     },
 
     getMemberOptions() {
@@ -91,6 +93,10 @@ const Editor = {
                         <input type="text" name="product" value="${goal?.product || ''}">
                     </div>
                 </div>
+                <div class="form-group">
+                    <label>태그</label>
+                    <input type="text" name="tags" value="${goal?.tags || ''}" placeholder="쉼표로 구분하여 입력 (예: 성능개선, 보안, UI)">
+                </div>
                 <div class="form-row">
                     <div class="form-group">
                         <label>시작일</label>
@@ -123,6 +129,7 @@ const Editor = {
             data.progress = parseInt(data.progress);
             data.year = parseInt(data.year);
             if (!data.quarter) data.quarter = null;
+            if (!data.tags) data.tags = null;
             if (!data.start_date) data.start_date = null;
             if (!data.end_date) data.end_date = null;
 
@@ -281,10 +288,11 @@ const Editor = {
                 <div class="form-group">
                     <label>역할 *</label>
                     <select name="role" required>
-                        <option value="PM" ${member?.role === 'PM' ? 'selected' : ''}>PM</option>
-                        <option value="Developer" ${member?.role === 'Developer' ? 'selected' : ''}>Developer</option>
-                        <option value="Designer" ${member?.role === 'Designer' ? 'selected' : ''}>Designer</option>
-                        <option value="QA" ${member?.role === 'QA' ? 'selected' : ''}>QA</option>
+                        <option value="총괄" ${member?.role === '총괄' ? 'selected' : ''}>총괄</option>
+                        <option value="BE Developer" ${member?.role === 'BE Developer' ? 'selected' : ''}>BE Developer</option>
+                        <option value="FE Developer" ${member?.role === 'FE Developer' ? 'selected' : ''}>FE Developer</option>
+                        <option value="UI/UX" ${member?.role === 'UI/UX' ? 'selected' : ''}>UI/UX</option>
+                        <option value="DevOps" ${member?.role === 'DevOps' ? 'selected' : ''}>DevOps</option>
                         <option value="Other" ${member?.role === 'Other' ? 'selected' : ''}>Other</option>
                     </select>
                 </div>

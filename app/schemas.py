@@ -111,6 +111,7 @@ class GoalBase(BaseModel):
     quarter: Optional[str] = None
     team: Optional[str] = None
     product: Optional[str] = None
+    tags: Optional[str] = None  # Comma-separated tags
     progress: int = 0
     start_date: Optional[date] = None
     end_date: Optional[date] = None
@@ -129,6 +130,7 @@ class GoalUpdate(BaseModel):
     quarter: Optional[str] = None
     team: Optional[str] = None
     product: Optional[str] = None
+    tags: Optional[str] = None
     progress: Optional[int] = None
     start_date: Optional[date] = None
     end_date: Optional[date] = None

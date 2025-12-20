@@ -11,6 +11,7 @@ const App = {
         Editor.init();
         Dashboard.init();
         GanttChart.init();
+        GoalManager.init();
 
         // Load available years
         await this.loadYears();
@@ -125,6 +126,8 @@ const App = {
             this.loadMembers();
         } else if (tabId === 'brainstorming') {
             this.loadIdeas();
+        } else if (tabId === 'goal-manager') {
+            GoalManager.update(this.currentYear);
         }
     },
 
@@ -141,9 +144,11 @@ const App = {
         this.renderGoalsTree();
         this.updateTeamFilter();
 
-        // Load members if on members tab
+        // Load tab-specific data
         if (this.currentTab === 'members') {
             await this.loadMembers();
+        } else if (this.currentTab === 'goal-manager') {
+            await GoalManager.update(this.currentYear);
         }
     },
 
@@ -205,20 +210,19 @@ const App = {
 
     renderProductAssignments(byProduct, unassigned) {
         const container = document.getElementById('productAssignments');
-        const products = Object.keys(byProduct);
-
-        if (products.length === 0 && unassigned.count === 0) {
-            container.innerHTML = '<div class="no-assignments">태스크에 배정된 인력이 없습니다.</div>';
-            return;
-        }
+        const products = Object.keys(byProduct).filter(p => p !== '공통');
 
         let html = '';
 
-        // Render each product group
+        // Render each product group (except 공통)
         products.forEach(product => {
             const data = byProduct[product];
             html += this.renderProductGroup(product, data.members, data.count);
         });
+
+        // Always render 공통 (Common) group
+        const commonData = byProduct['공통'] || { members: [], count: 0 };
+        html += this.renderProductGroup('공통', commonData.members, commonData.count);
 
         // Render unassigned members
         if (unassigned.count > 0) {
@@ -366,12 +370,14 @@ const App = {
     renderGoalItem(goal) {
         const typeClass = goal.type;
         const typeLabel = goal.type === 'issue' ? '문제점 개선' : goal.type === 'feature' ? '신규 기능' : '사용자 피드백';
+        const tagsHtml = goal.tags ? goal.tags.split(',').map(tag => `<span class="goal-tag">${tag.trim()}</span>`).join('') : '';
 
         return `
             <div class="goal-item" data-id="${goal.id}">
                 <div class="goal-header">
                     <span class="goal-expand">▶</span>
                     <span class="goal-type ${typeClass}">${typeLabel}</span>
+                    ${tagsHtml ? `<div class="goal-tags">${tagsHtml}</div>` : ''}
                     <span class="goal-title">${goal.title}</span>
                     <div class="goal-progress">
                         <div class="progress-bar">
@@ -386,7 +392,10 @@ const App = {
                     </div>
                 </div>
                 <div class="goal-children">
-                    ${goal.milestones.map(m => this.renderMilestoneItem(m, goal.id)).join('')}
+                    ${goal.milestones.length > 0
+                        ? goal.milestones.map(m => this.renderMilestoneItem(m, goal.id)).join('')
+                        : '<div class="empty-children">마일스톤이 없습니다. ➕ 버튼을 눌러 추가하세요.</div>'
+                    }
                 </div>
             </div>
         `;
