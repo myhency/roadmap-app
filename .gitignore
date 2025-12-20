@@ -4,6 +4,9 @@ roadmap.db
 # Generated reports
 2026/
 
+# Requirements doc
+REQUIREMENTS.md
+
 # Python
 __pycache__/
 *.py[cod]
