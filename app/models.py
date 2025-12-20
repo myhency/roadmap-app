@@ -11,6 +11,7 @@ class Member(Base):
     name = Column(String(100), nullable=False)
     role = Column(String(50), nullable=False)  # PM, Developer, Designer, QA, etc.
     team = Column(String(100))
+    product = Column(String(100))  # 배치 예정 제품
     type = Column(String(20), nullable=False)  # 'existing' or 'new'
     join_date = Column(Date)
     year = Column(Integer, nullable=False)

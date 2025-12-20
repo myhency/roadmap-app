@@ -46,49 +46,26 @@ def get_members_summary(year: int = None, db: Session = Depends(get_db)):
         else:
             by_role[role]['new'] += 1
 
-    # Get product assignments through tasks
-    goals_query = db.query(models.Goal)
-    if year:
-        goals_query = goals_query.filter(models.Goal.year == year)
-    all_goals = goals_query.all()
-
+    # Get product assignments from member's product field (배치 예정)
     by_product = {}
-    member_products = {}  # member_id -> set of products
+    unassigned_members = []
 
-    for goal in all_goals:
-        product = goal.product or 'Unassigned'
-        if product not in by_product:
-            by_product[product] = {'members': [], 'member_ids': set()}
+    for member in all_members:
+        member_data = {
+            'id': member.id,
+            'name': member.name,
+            'role': member.role,
+            'type': member.type
+        }
 
-        for milestone in goal.milestones:
-            for task in milestone.tasks:
-                if task.assignee_id and task.assignee:
-                    member = task.assignee
-                    if member.id not in by_product[product]['member_ids']:
-                        by_product[product]['member_ids'].add(member.id)
-                        by_product[product]['members'].append({
-                            'id': member.id,
-                            'name': member.name,
-                            'role': member.role,
-                            'type': member.type
-                        })
-
-                    # Track which products each member is assigned to
-                    if member.id not in member_products:
-                        member_products[member.id] = set()
-                    member_products[member.id].add(product)
-
-    # Convert sets to counts for JSON serialization
-    for product in by_product:
-        by_product[product]['count'] = len(by_product[product]['members'])
-        del by_product[product]['member_ids']
-
-    # Unassigned members (not assigned to any task)
-    assigned_member_ids = set(member_products.keys())
-    unassigned_members = [
-        {'id': m.id, 'name': m.name, 'role': m.role, 'type': m.type}
-        for m in all_members if m.id not in assigned_member_ids
-    ]
+        if member.product:
+            product = member.product
+            if product not in by_product:
+                by_product[product] = {'members': [], 'count': 0}
+            by_product[product]['members'].append(member_data)
+            by_product[product]['count'] += 1
+        else:
+            unassigned_members.append(member_data)
 
     return {
         'total': total,

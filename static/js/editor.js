@@ -291,14 +291,26 @@ const Editor = {
                         <option value="총괄" ${member?.role === '총괄' ? 'selected' : ''}>총괄</option>
                         <option value="BE Developer" ${member?.role === 'BE Developer' ? 'selected' : ''}>BE Developer</option>
                         <option value="FE Developer" ${member?.role === 'FE Developer' ? 'selected' : ''}>FE Developer</option>
+                        <option value="AI/ML Engineer" ${member?.role === 'AI/ML Engineer' ? 'selected' : ''}>AI/ML Engineer</option>
                         <option value="UI/UX" ${member?.role === 'UI/UX' ? 'selected' : ''}>UI/UX</option>
                         <option value="DevOps" ${member?.role === 'DevOps' ? 'selected' : ''}>DevOps</option>
                         <option value="Other" ${member?.role === 'Other' ? 'selected' : ''}>Other</option>
                     </select>
                 </div>
-                <div class="form-group">
-                    <label>팀</label>
-                    <input type="text" name="team" value="${member?.team || ''}">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>팀</label>
+                        <input type="text" name="team" value="${member?.team || ''}">
+                    </div>
+                    <div class="form-group">
+                        <label>배치 예정 제품</label>
+                        <select name="product">
+                            <option value="">선택 안함</option>
+                            <option value="H Chat" ${member?.product === 'H Chat' ? 'selected' : ''}>H Chat</option>
+                            <option value="API Platform" ${member?.product === 'API Platform' ? 'selected' : ''}>API Platform</option>
+                            <option value="공통" ${member?.product === '공통' ? 'selected' : ''}>공통</option>
+                        </select>
+                    </div>
                 </div>
                 <div class="form-row">
                     <div class="form-group">
@@ -331,6 +343,7 @@ const Editor = {
             const data = Object.fromEntries(formData);
             data.year = parseInt(data.year);
             if (!data.join_date) data.join_date = null;
+            if (!data.product) data.product = null;
 
             if (isEdit) {
                 await API.updateMember(member.id, data);

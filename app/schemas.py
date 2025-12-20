@@ -8,6 +8,7 @@ class MemberBase(BaseModel):
     name: str
     role: str
     team: Optional[str] = None
+    product: Optional[str] = None  # 배치 예정 제품
     type: str  # 'existing' or 'new'
     join_date: Optional[date] = None
     year: int
@@ -21,6 +22,7 @@ class MemberUpdate(BaseModel):
     name: Optional[str] = None
     role: Optional[str] = None
     team: Optional[str] = None
+    product: Optional[str] = None
     type: Optional[str] = None
     join_date: Optional[date] = None
     year: Optional[int] = None

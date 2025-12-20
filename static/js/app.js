@@ -256,12 +256,12 @@ const App = {
             <div class="product-group ${isUnassigned ? 'unassigned' : ''}">
                 <div class="product-group-header">
                     <div class="product-group-left">
-                        <span class="product-expand">▶</span>
+                        <span class="product-expand expanded">▶</span>
                         <span class="product-name">${productName}</span>
                     </div>
                     <span class="product-count">${count}명</span>
                 </div>
-                <div class="product-group-body">
+                <div class="product-group-body expanded">
                     <div class="product-members">
                         ${membersHtml || '<span style="color: var(--text-secondary);">배정된 인력 없음</span>'}
                     </div>
