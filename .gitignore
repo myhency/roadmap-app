@@ -23,7 +23,6 @@ ENV/
 .vscode/
 
 # Claude Code
-.claude/
 *.swp
 *.swo
 

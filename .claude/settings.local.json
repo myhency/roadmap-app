@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "mcp__vibium__browser_navigate",
+      "mcp__vibium__browser_screenshot",
+      "mcp__vibium__browser_click",
+      "mcp__vibium__browser_launch",
+      "mcp__vibium__browser_quit",
+      "Skill(skill-creator)"
+    ]
+  }
+}
