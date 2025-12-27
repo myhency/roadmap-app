@@ -755,9 +755,116 @@ const App = {
     },
 
     // Export
-    exportPdf() {
-        alert('PDF 내보내기 기능은 추후 구현 예정입니다.');
-        // TODO: Implement PDF export using html2pdf or similar library
+    async exportPdf() {
+        const exportBtn = document.getElementById('exportPdfBtn');
+        const originalText = exportBtn.textContent;
+        exportBtn.textContent = '내보내는 중...';
+        exportBtn.disabled = true;
+
+        try {
+            const { jsPDF } = window.jspdf;
+
+            // A4 Landscape
+            const pdf = new jsPDF({
+                orientation: 'landscape',
+                unit: 'mm',
+                format: 'a4'
+            });
+
+            const pageWidth = pdf.internal.pageSize.getWidth();
+            const pageHeight = pdf.internal.pageSize.getHeight();
+            const margin = 10;
+            const contentWidth = pageWidth - (margin * 2);
+            let yPosition = margin;
+
+            // 1. Title
+            pdf.setFontSize(16);
+            pdf.text(`Roadmap Dashboard ${this.currentYear}`, pageWidth / 2, yPosition + 5, { align: 'center' });
+            yPosition += 15;
+
+            // 2. Summary Cards
+            const summarySection = document.querySelector('.summary-cards');
+            if (summarySection) {
+                const summaryCanvas = await html2canvas(summarySection, {
+                    scale: 2,
+                    useCORS: true,
+                    logging: false,
+                    backgroundColor: '#ffffff'
+                });
+                const summaryImgData = summaryCanvas.toDataURL('image/png');
+                const summaryHeight = (summaryCanvas.height * contentWidth) / summaryCanvas.width;
+                pdf.addImage(summaryImgData, 'PNG', margin, yPosition, contentWidth, summaryHeight);
+                yPosition += summaryHeight + 10;
+            }
+
+            // 3. Charts Section
+            const chartsSection = document.querySelector('.charts-section');
+            if (chartsSection) {
+                const chartsCanvas = await html2canvas(chartsSection, {
+                    scale: 2,
+                    useCORS: true,
+                    logging: false,
+                    backgroundColor: '#ffffff'
+                });
+                const chartsImgData = chartsCanvas.toDataURL('image/png');
+                const chartsHeight = (chartsCanvas.height * contentWidth) / chartsCanvas.width;
+
+                if (yPosition + chartsHeight > pageHeight - margin) {
+                    pdf.addPage();
+                    yPosition = margin;
+                }
+
+                pdf.addImage(chartsImgData, 'PNG', margin, yPosition, contentWidth, chartsHeight);
+                yPosition += chartsHeight + 10;
+            }
+
+            // 4. Goals List (new page, item-by-item to avoid cutting)
+            const goalItems = document.querySelectorAll('.goals-tree .goal-item');
+            if (goalItems.length > 0) {
+                pdf.addPage();
+                yPosition = margin;
+
+                // Add section title
+                pdf.setFontSize(14);
+                pdf.text('Goals List', margin, yPosition + 5);
+                yPosition += 12;
+
+                const availableHeight = pageHeight - margin;
+
+                for (const goalItem of goalItems) {
+                    const itemCanvas = await html2canvas(goalItem, {
+                        scale: 2,
+                        useCORS: true,
+                        logging: false,
+                        backgroundColor: '#ffffff'
+                    });
+
+                    const itemImgData = itemCanvas.toDataURL('image/png');
+                    const itemWidth = contentWidth;
+                    const itemHeight = (itemCanvas.height * itemWidth) / itemCanvas.width;
+
+                    // Check if item fits on current page
+                    if (yPosition + itemHeight > availableHeight) {
+                        pdf.addPage();
+                        yPosition = margin;
+                    }
+
+                    pdf.addImage(itemImgData, 'PNG', margin, yPosition, itemWidth, itemHeight);
+                    yPosition += itemHeight + 3; // 3mm gap between items
+                }
+            }
+
+            // 5. Save PDF
+            const fileName = `Roadmap_Dashboard_${this.currentYear}_${new Date().toISOString().split('T')[0]}.pdf`;
+            pdf.save(fileName);
+
+        } catch (error) {
+            console.error('PDF export failed:', error);
+            alert('PDF 내보내기 중 오류가 발생했습니다.');
+        } finally {
+            exportBtn.textContent = originalText;
+            exportBtn.disabled = false;
+        }
     },
 
     // [TEST] Reset all data - Remove after testing
