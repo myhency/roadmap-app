@@ -30,7 +30,7 @@ ENV/
 .DS_Store
 Thumbs.db
 
-# PyInstaller
+# Build outputs / PyInstaller
 build/
 dist/
 *.spec

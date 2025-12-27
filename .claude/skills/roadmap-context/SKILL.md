@@ -66,6 +66,8 @@ Idea (아이디어)
 | `GET /api/dashboard/summary?year=` | 진행 상황 요약 |
 | `GET /api/years` | 사용 가능 연도 목록 |
 | `GET /api/gantt/data?year=` | 간트차트 데이터 |
+| `GET /api/export-db` | DB 파일 내보내기 |
+| `POST /api/import-db` | DB 파일 가져오기 |
 | `/api/goals/` | Goal CRUD |
 | `/api/milestones/` | Milestone CRUD |
 | `/api/tasks/` | Task CRUD |
@@ -78,6 +80,7 @@ Idea (아이디어)
 2. **간트차트**: Goal → Milestone → Task 계층 시각화
 3. **PDF 내보내기**: 진행 차트 + 목표 목록 PDF 생성
 4. **아이디어 관리**: 아이디어 등록, 우선순위, 상태 관리, 댓글
+5. **DB 내보내기/가져오기**: SQLite 파일로 데이터 공유 (메신저 등으로 파일 전송)
 
 ## 개발 명령어
 

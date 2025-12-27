@@ -24,8 +24,19 @@
             </select>
             <button id="addGoalBtn" class="btn btn-primary">+ 목표 추가</button>
             <button id="addMemberBtn" class="btn btn-secondary">+ 인력 추가</button>
-            <button id="exportPdfBtn" class="btn btn-outline">PDF 내보내기</button>
-            <button id="resetDataBtn" class="btn btn-danger" style="margin-left: 1rem;">전체 데이터 삭제</button>
+            <div class="dropdown" id="dataManageDropdown">
+                <button class="btn btn-outline dropdown-toggle" id="dataManageBtn">
+                    데이터 관리 ▾
+                </button>
+                <div class="dropdown-menu" id="dataManageMenu">
+                    <button class="dropdown-item" id="exportPdfBtn">PDF 내보내기</button>
+                    <button class="dropdown-item" id="exportDbBtn">DB 내보내기</button>
+                    <button class="dropdown-item" id="importDbBtn">DB 가져오기</button>
+                    <div class="dropdown-divider"></div>
+                    <button class="dropdown-item dropdown-item-danger" id="resetDataBtn">전체 데이터 삭제</button>
+                </div>
+            </div>
+            <input type="file" id="dbFileInput" accept=".db" style="display: none;">
         </div>
     </header>
 
