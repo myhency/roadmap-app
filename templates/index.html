@@ -101,12 +101,28 @@
                 <div class="card">
                     <div class="gantt-header">
                         <h3>로드맵 타임라인</h3>
-                        <div class="gantt-view-modes">
-                            <button class="btn btn-sm" data-mode="Week">주</button>
-                            <button class="btn btn-sm active" data-mode="Month">월</button>
+                        <div class="gantt-controls">
+                            <div class="gantt-scroll-to">
+                                <label>이동:</label>
+                                <select id="ganttScrollYear" class="gantt-scroll-select" onchange="GanttChart.scrollToSelectedDate()">
+                                    <option value="2025">2025</option>
+                                    <option value="2026" selected>2026</option>
+                                    <option value="2027">2027</option>
+                                </select>
+                                <select id="ganttScrollQuarter" class="gantt-scroll-select" onchange="GanttChart.scrollToSelectedDate()">
+                                    <option value="1">1Q (1월)</option>
+                                    <option value="2">2Q (4월)</option>
+                                    <option value="3">3Q (7월)</option>
+                                    <option value="4">4Q (10월)</option>
+                                </select>
+                            </div>
+                            <div class="gantt-view-modes">
+                                <button class="btn btn-sm" data-mode="Week">주</button>
+                                <button class="btn btn-sm active" data-mode="Month">월</button>
+                            </div>
                         </div>
                     </div>
-                    <div id="gantt"></div>
+                    <div class="gantt-container" id="gantt"></div>
                 </div>
             </section>
 

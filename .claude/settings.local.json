@@ -6,7 +6,8 @@
       "mcp__vibium__browser_click",
       "mcp__vibium__browser_launch",
       "mcp__vibium__browser_quit",
-      "Skill(skill-creator)"
+      "Skill(skill-creator)",
+      "Skill(roadmap-context)"
     ]
   }
 }
