@@ -137,6 +137,7 @@ const App = {
 
         // Load all data
         this.goals = await API.getGoals({ year: this.currentYear });
+        this.members = await API.getMembers({ year: this.currentYear });
 
         // Update all views
         await Dashboard.update(this.currentYear);
@@ -146,7 +147,11 @@ const App = {
 
         // Load tab-specific data
         if (this.currentTab === 'members') {
-            await this.loadMembers();
+            const summary = await API.getMembersSummary({ year: this.currentYear });
+            this.updateMembersSummary(summary);
+            this.renderRoleDistribution(summary.by_role);
+            this.renderProductAssignments(summary.by_product, summary.unassigned);
+            this.renderMembersList();
         } else if (this.currentTab === 'goal-manager') {
             await GoalManager.update(this.currentYear);
         }
@@ -341,6 +346,18 @@ const App = {
             filteredGoals = filteredGoals.filter(g => g.team === teamFilter);
         }
 
+        // 분기 오름차순 정렬 (Q1 > Q2 > Q3 > Q4 > 미정)
+        const getQuarterOrder = (dateStr) => {
+            if (!dateStr) return 5; // 미정은 맨 뒤로
+            const month = parseInt(dateStr.split('-')[1]);
+            if (month >= 1 && month <= 3) return 1;
+            if (month >= 4 && month <= 6) return 2;
+            if (month >= 7 && month <= 9) return 3;
+            if (month >= 10 && month <= 12) return 4;
+            return 5;
+        };
+        filteredGoals = [...filteredGoals].sort((a, b) => getQuarterOrder(a.start_date) - getQuarterOrder(b.start_date));
+
         if (filteredGoals.length === 0) {
             container.innerHTML = `
                 <div class="empty-state">
@@ -372,13 +389,35 @@ const App = {
         const typeLabel = goal.type === 'issue' ? '문제점 개선' : goal.type === 'feature' ? '신규 기능' : '사용자 피드백';
         const tagsHtml = goal.tags ? goal.tags.split(',').map(tag => `<span class="goal-tag">${tag.trim()}</span>`).join('') : '';
 
+        // 날짜를 분기로 변환
+        const getQuarter = (dateStr) => {
+            if (!dateStr) return null;
+            const month = parseInt(dateStr.split('-')[1]);
+            if (month >= 1 && month <= 3) return 'Q1';
+            if (month >= 4 && month <= 6) return 'Q2';
+            if (month >= 7 && month <= 9) return 'Q3';
+            if (month >= 10 && month <= 12) return 'Q4';
+            return null;
+        };
+        const quarter = getQuarter(goal.start_date);
+        const quarterDisplay = quarter || '';
+
+        // 담당자 목록 수집 (해당 제품 담당자 + 공통 인원)
+        const assignees = this.members.filter(member => {
+            return member.product === goal.product || member.product === '공통';
+        }).map(member => member.name);
+        const assigneeDisplay = assignees.length > 0 ? assignees.join(', ') : '';
+
         return `
             <div class="goal-item" data-id="${goal.id}">
                 <div class="goal-header">
                     <span class="goal-expand">▶</span>
                     <span class="goal-type ${typeClass}">${typeLabel}</span>
+                    ${goal.product ? `<span class="goal-product">${goal.product}</span>` : ''}
                     ${tagsHtml ? `<div class="goal-tags">${tagsHtml}</div>` : ''}
                     <span class="goal-title">${goal.title}</span>
+                    ${quarterDisplay ? `<span class="goal-dates">📅 ${quarterDisplay}</span>` : ''}
+                    ${assigneeDisplay ? `<span class="goal-assignees">👤 ${assigneeDisplay}</span>` : ''}
                     <div class="goal-progress">
                         <div class="progress-bar">
                             <div class="progress-fill" style="width: ${goal.progress}%"></div>

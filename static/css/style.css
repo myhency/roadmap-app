@@ -383,6 +383,36 @@ body.panel-open .gantt * {
     color: #0369a1;
 }
 
+.goal-dates {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    background-color: #fef3c7;
+    padding: 0.125rem 0.5rem;
+    border-radius: 4px;
+    white-space: nowrap;
+}
+
+.goal-assignees {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    background-color: #dbeafe;
+    padding: 0.125rem 0.5rem;
+    border-radius: 4px;
+    max-width: 350px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.goal-product {
+    font-size: 0.75rem;
+    color: white;
+    background-color: #6366f1;
+    padding: 0.125rem 0.5rem;
+    border-radius: 4px;
+    white-space: nowrap;
+}
+
 .goal-progress {
     display: flex;
     align-items: center;
