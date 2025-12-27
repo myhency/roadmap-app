@@ -63,13 +63,51 @@ const App = {
             Editor.showMemberForm();
         });
 
+        // Data Management Dropdown
+        const dataManageBtn = document.getElementById('dataManageBtn');
+        const dataManageMenu = document.getElementById('dataManageMenu');
+
+        dataManageBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            dataManageMenu.classList.toggle('show');
+        });
+
+        // Close dropdown when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('#dataManageDropdown')) {
+                dataManageMenu.classList.remove('show');
+            }
+        });
+
         // Export PDF button
         document.getElementById('exportPdfBtn').addEventListener('click', () => {
+            dataManageMenu.classList.remove('show');
             this.exportPdf();
+        });
+
+        // Export DB button
+        document.getElementById('exportDbBtn').addEventListener('click', () => {
+            dataManageMenu.classList.remove('show');
+            this.exportDb();
+        });
+
+        // Import DB button
+        document.getElementById('importDbBtn').addEventListener('click', () => {
+            dataManageMenu.classList.remove('show');
+            document.getElementById('dbFileInput').click();
+        });
+
+        // DB file input change
+        document.getElementById('dbFileInput').addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                this.importDb(e.target.files[0]);
+                e.target.value = ''; // Reset for next selection
+            }
         });
 
         // [TEST] Reset all data button
         document.getElementById('resetDataBtn').addEventListener('click', () => {
+            dataManageMenu.classList.remove('show');
             this.resetAllData();
         });
 
@@ -875,6 +913,57 @@ const App = {
                 alert('모든 데이터가 삭제되었습니다.');
                 location.reload();
             }
+        }
+    },
+
+    // Export DB
+    async exportDb() {
+        try {
+            const response = await fetch('/api/export-db');
+            if (!response.ok) {
+                throw new Error('DB 내보내기 실패');
+            }
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            const date = new Date().toISOString().split('T')[0];
+            a.download = `roadmap_${date}.db`;
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+            document.body.removeChild(a);
+        } catch (error) {
+            console.error('DB export failed:', error);
+            alert('DB 내보내기 중 오류가 발생했습니다.');
+        }
+    },
+
+    // Import DB
+    async importDb(file) {
+        if (!confirm('DB를 가져오면 현재 데이터가 모두 대체됩니다.\n\n계속하시겠습니까?')) {
+            return;
+        }
+
+        try {
+            const formData = new FormData();
+            formData.append('file', file);
+
+            const response = await fetch('/api/import-db', {
+                method: 'POST',
+                body: formData
+            });
+
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.detail || 'DB 가져오기 실패');
+            }
+
+            alert('DB를 성공적으로 가져왔습니다.');
+            location.reload();
+        } catch (error) {
+            console.error('DB import failed:', error);
+            alert('DB 가져오기 중 오류가 발생했습니다.\n\n' + error.message);
         }
     }
 };

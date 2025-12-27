@@ -1,9 +1,12 @@
-from fastapi import FastAPI, Depends, Request
+from fastapi import FastAPI, Depends, Request, UploadFile, File, HTTPException
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, FileResponse
 from sqlalchemy.orm import Session
 from sqlalchemy import func
+import shutil
+import os
+from datetime import datetime
 
 from app.database import engine, get_db, Base
 from app import models, schemas
@@ -187,6 +190,53 @@ def reset_all_data(db: Session = Depends(get_db)):
     db.query(models.Member).delete()
     db.commit()
     return {"message": "All data has been deleted"}
+
+
+# DB path
+DB_PATH = "./roadmap.db"
+
+
+@app.get("/api/export-db")
+def export_db():
+    """Export the database file"""
+    if not os.path.exists(DB_PATH):
+        raise HTTPException(status_code=404, detail="Database file not found")
+
+    return FileResponse(
+        path=DB_PATH,
+        filename=f"roadmap_{datetime.now().strftime('%Y%m%d')}.db",
+        media_type="application/octet-stream"
+    )
+
+
+@app.post("/api/import-db")
+async def import_db(file: UploadFile = File(...)):
+    """Import a database file (replaces current database)"""
+    if not file.filename.endswith('.db'):
+        raise HTTPException(status_code=400, detail="Invalid file type. Please upload a .db file")
+
+    # Create backup of current DB
+    backup_path = f"./roadmap_backup_{datetime.now().strftime('%Y%m%d_%H%M%S')}.db"
+    if os.path.exists(DB_PATH):
+        shutil.copy2(DB_PATH, backup_path)
+
+    try:
+        # Save uploaded file
+        with open(DB_PATH, "wb") as buffer:
+            content = await file.read()
+            buffer.write(content)
+
+        # Remove backup on success
+        if os.path.exists(backup_path):
+            os.remove(backup_path)
+
+        return {"message": "Database imported successfully"}
+    except Exception as e:
+        # Restore backup on failure
+        if os.path.exists(backup_path):
+            shutil.copy2(backup_path, DB_PATH)
+            os.remove(backup_path)
+        raise HTTPException(status_code=500, detail=f"Failed to import database: {str(e)}")
 
 
 if __name__ == "__main__":
