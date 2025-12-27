@@ -28,9 +28,16 @@ const App = {
         const yearFilter = document.getElementById('yearFilter');
         yearFilter.innerHTML = years.map(y => `<option value="${y}">${y}</option>`).join('');
 
+        // Update Gantt scroll year dropdown
+        const ganttYearSelect = document.getElementById('ganttScrollYear');
+        if (ganttYearSelect) {
+            ganttYearSelect.innerHTML = years.map(y => `<option value="${y}">${y}</option>`).join('');
+        }
+
         if (years.length > 0) {
             this.currentYear = years[0];
             Editor.currentYear = years[0];
+            GanttChart.updateYearDropdown();
         }
     },
 
@@ -47,6 +54,7 @@ const App = {
             this.currentYear = parseInt(e.target.value);
             Editor.currentYear = this.currentYear;
             Editor.loadMembers();
+            GanttChart.updateYearDropdown();
             this.refresh();
         });
 
@@ -202,6 +210,12 @@ const App = {
 
         yearFilter.innerHTML = years.map(y => `<option value="${y}">${y}</option>`).join('');
 
+        // Update Gantt scroll year dropdown
+        const ganttYearSelect = document.getElementById('ganttScrollYear');
+        if (ganttYearSelect) {
+            ganttYearSelect.innerHTML = years.map(y => `<option value="${y}">${y}</option>`).join('');
+        }
+
         // Keep current selection if it still exists
         if (years.includes(parseInt(currentValue))) {
             yearFilter.value = currentValue;
@@ -210,6 +224,7 @@ const App = {
             this.currentYear = years[0];
             Editor.currentYear = years[0];
         }
+        GanttChart.updateYearDropdown();
     },
 
     async loadMembers() {

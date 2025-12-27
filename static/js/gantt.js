@@ -18,6 +18,39 @@ const GanttChart = {
                 }
             });
         });
+
+        // Update year dropdown based on available years
+        this.updateYearDropdown();
+    },
+
+    updateYearDropdown() {
+        const yearSelect = document.getElementById('ganttScrollYear');
+        if (!yearSelect) return;
+
+        // Sync with the main year filter
+        const mainYearFilter = document.getElementById('yearFilter');
+        if (mainYearFilter) {
+            const currentYear = parseInt(mainYearFilter.value);
+            yearSelect.value = currentYear.toString();
+        }
+    },
+
+    scrollToSelectedDate() {
+        if (!this.chart) return;
+
+        const yearSelect = document.getElementById('ganttScrollYear');
+        const quarterSelect = document.getElementById('ganttScrollQuarter');
+        if (!yearSelect || !quarterSelect) return;
+
+        const year = parseInt(yearSelect.value);
+        const quarter = parseInt(quarterSelect.value);
+
+        // Q1=Jan(0), Q2=Apr(3), Q3=Jul(6), Q4=Oct(9)
+        const targetMonth = (quarter - 1) * 3;
+        const targetDate = new Date(year, targetMonth, 1);
+
+        // Use Frappe Gantt's set_scroll_position method
+        this.chart.set_scroll_position(targetDate);
     },
 
     renderChart(tasks) {

@@ -248,6 +248,31 @@ select {
     margin-bottom: 0;
 }
 
+.gantt-controls {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.gantt-scroll-to {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.gantt-scroll-to label {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+}
+
+.gantt-scroll-select {
+    padding: 0.25rem 0.5rem;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    font-size: 0.875rem;
+    background: var(--background);
+}
+
 .gantt-view-modes {
     display: flex;
     gap: 0.25rem;
