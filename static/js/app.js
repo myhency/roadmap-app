@@ -402,9 +402,9 @@ const App = {
         const quarter = getQuarter(goal.start_date);
         const quarterDisplay = quarter || '';
 
-        // 담당자 목록 수집 (해당 제품 담당자 + 공통 인원)
+        // 담당자 목록 수집 (해당 제품 담당자만)
         const assignees = this.members.filter(member => {
-            return member.product === goal.product || member.product === '공통';
+            return member.product === goal.product;
         }).map(member => member.name);
         const assigneeDisplay = assignees.length > 0 ? assignees.join(', ') : '';
 
